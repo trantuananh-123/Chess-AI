@@ -20,6 +20,8 @@ IMAGES = {}
 # Colors
 WHITE_COLOR = pygame.Color('#ffffff')
 BROWN_COLOR = pygame.Color('#813000')
+
+
 '''
 Initialize a global dictionary for storing all the images. This will be call only once in the main.
 '''
