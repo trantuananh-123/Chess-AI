@@ -29,33 +29,7 @@ def load_images():
     chessman_images = ['wP', 'wR', 'wN', 'wB', 'wK', 'wQ', 'bP', 'bR', 'bN', 'bB', 'bK', 'bQ']
     for image in chessman_images:
         # Load images from images folder and scale them to fit the chess box
-        IMAGES[image] = pygame.transform.scale(pygame.image.load('../images/' + image + '.png'), (SQUARE_SIZE, SQUARE_SIZE))
-
-
-'''
-Main driver file.
-'''    
-def main():
-    # Safely initialize all imported pygame modules
-    pygame.init()
-    # Initialize a window or screen for displaying content
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    # Create an object to help track time
-    clock = pygame.time.Clock()
-    # Fill surface with color
-    screen.fill(pygame.Color(WHITE_COLOR))
-    game_state = chess_engine.game_state()
-    load_images()
-    running = True
-    while running:
-        for p in pygame.event.get():
-            if p.type == pygame.QUIT:
-                running = False
-            # Update the clock and limit the program to run < MAX_FPS frame per second
-            clock.tick(MAX_FPS)
-            # Update the full display surface to the screen
-            pygame.display.flip()  
-            draw_game_state(screen, game_state)      
+        IMAGES[image] = pygame.transform.scale(pygame.image.load('../images/' + image + '.png'), (SQUARE_SIZE, SQUARE_SIZE))  
 
 
 '''
@@ -93,5 +67,62 @@ def draw_chess_box(screen, board):
                 screen.blit(IMAGES[chessman], pygame.Rect(col * SQUARE_SIZE, row * SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
     
 
+
+'''
+Main driver file.
+'''    
+def main():
+    # Safely initialize all imported pygame modules
+    pygame.init()
+    # Initialize a window or screen for displaying content
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    square = pygame.Surface((SQUARE_SIZE, SQUARE_SIZE))
+    # Create an object to help track time
+    clock = pygame.time.Clock()
+    # Fill surface with color
+    screen.fill(pygame.Color(WHITE_COLOR))
+    # Get the current game state
+    game_state = chess_engine.game_state()
+    # Load images
+    load_images()
+    # Selected chess box, keep track of the last click of user(tuple: (row, col))
+    selected_chess_box = ()
+    # Keep track of player clicks(two tuples: [(), ()])
+    player_clicks = []
+    # Main game loop
+    running = True
+    while running:
+        for p in pygame.event.get():
+            if p.type == pygame.QUIT:
+                running = False
+            if p.type == pygame.MOUSEBUTTONDOWN:
+                # Get mouse location (x, y)
+                location = pygame.mouse.get_pos()
+                col = location[0] // SQUARE_SIZE
+                row = location[1] // SQUARE_SIZE
+                # If the user click the same chess box twice
+                if selected_chess_box == (row, col):
+                    # Make the selected chess box unselected
+                    selected_chess_box = ()
+                    # Clear the player clicks
+                    player_clicks = []
+                else:
+                    selected_chess_box = (row, col)
+                    # Append first chess box and second chess box to the player clicks
+                    player_clicks.append(selected_chess_box)
+                if len(player_clicks) == 2:
+                    move = chess_engine.move(player_clicks[0], player_clicks[1], game_state.board)
+                    print(move.get_chess_notaion())
+                    game_state.make_move(move)
+                    # Reset the player clicks
+                    selected_chess_box = ()
+                    player_clicks = []
+            # Update the clock and limit the program to run < MAX_FPS frame per second
+            clock.tick(MAX_FPS)
+            # Update the full display surface to the screen
+            pygame.display.flip()
+            draw_game_state(screen, game_state)    
+            
+            
 if __name__ == "__main__":
     main()
