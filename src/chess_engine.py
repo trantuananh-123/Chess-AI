@@ -83,13 +83,10 @@ class game_state:
         for i in range(len(moves) - 1, -1, -1):  # Back an index after remove an element
             self.make_move(moves[i])
             # 3. Generate all enemy's possible moves
-            enemy_moves = self.possible_move()
             # 4. For each enemy move check if your king is being attacked
-            self.white_turn = not self.white_turn
             if self.in_check():
                 # 5. If your king is being attacked --> not a valid move
                 moves.remove(moves[i])
-            self.white_turn = not self.white_turn
             self.undo_move()
         if len(moves) == 0:
             if self.in_check():
@@ -103,15 +100,13 @@ class game_state:
 
     # Determine if current player is in check
     def in_check(self):
-        if self.white_turn:
+        if not self.white_turn:
             return self.under_attack(self.wK_location[0], self.wK_location[1])
         return self.under_attack(self.bK_location[0], self.bK_location[1])
 
     # Determine if enemy can attack the chess box
     def under_attack(self, row, col):
-        self.white_turn = not self.white_turn
         enemy_moves = self.possible_move()
-        self.white_turn = not self.white_turn
         for move in enemy_moves:
             if move.end_row == row and move.end_col == col:
                 return True
